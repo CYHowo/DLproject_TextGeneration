@@ -1,0 +1,12 @@
+__pycache__/
+wandb/
+gpt_shakespeare.pth
+input.txt
+modelito.py
+modelito.ipynb
+shakespeare.txt
+shakesperean.txt
+shakesperean_text_generation.ipynb
+shakesperean_text_generation-2.ipynb
+test.py
+
