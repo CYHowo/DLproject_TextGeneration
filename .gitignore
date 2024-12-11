@@ -9,4 +9,6 @@ shakesperean.txt
 shakesperean_text_generation.ipynb
 shakesperean_text_generation-2.ipynb
 test.py
+model/
+test.ipynb
 

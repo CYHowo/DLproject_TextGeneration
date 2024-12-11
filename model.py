@@ -10,8 +10,8 @@ class CharDataset(Dataset):
         chars = sorted(list(set(data)))
 
         # map characters to integer
-        self.stoi = { ch:i for i,ch in enumerate(chars) }
-        self.itos = {i: ch for i, ch in enumerate(chars)}
+        self.stoi = { ch :i for i,ch in enumerate(chars) }
+        self.itos = { i : ch for i, ch in enumerate(chars)}
         self.block_size = config.block_size
 
         # encode the string as tensor of character
@@ -56,21 +56,21 @@ class CausalSelfAttention(nn.Module):
         self.attn_dropout = nn.Dropout(config.dropout)
         self.resid_dropout = nn.Dropout(config.dropout)
         self.register_buffer("mask", torch.tril(torch.ones(config.block_size, config.block_size))
-                                      .view(1, 1, config.block_size, config.block_size))
+                                      .reshape(1, 1, config.block_size, config.block_size))  # 使用 reshape
 
     def forward(self, x):
         batch, seq_len, embed = x.size()
         K, Q, V = self.key(x), self.query(x), self.value(x)
-        K = K.view(batch, len, -1, self.kqv_dim).transpose(1, 2)
-        Q = Q.view(batch, len, -1, self.kqv_dim).transpose(1, 2)
-        V = V.view(batch, len, -1, self.kqv_dim).transpose(1, 2)
+        K = K.reshape(batch, seq_len, -1, self.kqv_dim).transpose(1, 2)  # 使用 reshape
+        Q = Q.reshape(batch, seq_len, -1, self.kqv_dim).transpose(1, 2)  # 使用 reshape
+        V = V.reshape(batch, seq_len, -1, self.kqv_dim).transpose(1, 2)  # 使用 reshape
 
         att = (Q @ K.transpose(-2, -1)) / (self.kqv_dim ** 0.5)
-        att = att.masked_fill(self.mask[:, :, :len, :len] == 0, float('-inf'))
+        att = att.masked_fill(self.mask[:, :, :seq_len, :seq_len] == 0, float('-inf'))
         att = F.softmax(att, dim=-1)
         att = self.attn_dropout(att)
         y = att @ V
-        y = y.transpose(1, 2).contiguous().view(batch, seq_len, embed)
+        y = y.transpose(1, 2).contiguous().reshape(batch, seq_len, embed)  # 使用 reshape
         y = self.resid_dropout(self.proj(y))
         return y
 
@@ -97,8 +97,11 @@ class TransformerBlock(nn.Module):
 class DecoderOnlyTransformer(nn.Module):
     def __init__(self, config):
         super().__init__()
+        ## concentrate on word's meaning
         self.token_embeddings = nn.Embedding(config.vocab_size, config.embed_dim)
+        ## concentrate on word's position
         self.position_embeddings = nn.Embedding(config.block_size, config.embed_dim)
+        ## avoid overfitting
         self.dropout = nn.Dropout(config.dropout)
         self.layers = nn.ModuleList([TransformerBlock(config) for _ in range(config.n_layers)])
         self.layer_norm = nn.LayerNorm(config.embed_dim)
@@ -119,7 +122,7 @@ class DecoderOnlyTransformer(nn.Module):
         return logits
 
     def generate(self, idx, max_length, temperature=1.0, top_k=None):
-        for _ in range(max_length-1):
+        for _ in range(max_length - 1):
             logits = self(idx)
             # print(logits[:, -1, :].shape)
             logits = (logits[:, -1, :] / temperature)
