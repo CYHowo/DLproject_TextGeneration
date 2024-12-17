@@ -1,17 +1,17 @@
-### Deep Learning Project - Shakespeare Text Generation
+## Deep Learning Project - Shakespeare Text Generation
 
-##### **Objective**
+### **Objective**
 
 Implement a transformer-based, character-level language model (GPT-like) and train it on the Shakespeare dataset. By the end of this project, you should be able to generate Shakespearean-like text given a seed string.
 
-#### **Environment**
+### **Environment**
 
 ```
 pip install -r /path/to/requirements.txt
 
 ```
 
-#### **Dataset**:
+### **Dataset**:
 
 The Shakespeare dataset contains the complete works of William Shakespeare, including his plays, poems, and sonnets.
 
