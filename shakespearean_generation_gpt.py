@@ -60,7 +60,7 @@ print(model)
 optimizer = AdamW(model.parameters(), lr=1e-4)
 criterion = torch.nn.CrossEntropyLoss()
 
-## Training Loop
+## Train the model
 model.train()
 num_epochs = 1000
 best_loss = float("inf")
