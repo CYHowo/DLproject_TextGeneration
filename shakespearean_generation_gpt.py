@@ -54,6 +54,9 @@ dataloader = DataLoader(dataset, batch_size=64, shuffle=True)
 ## Configure WandB
 wandb.init(project="shakesperean", config={"model": "gpt2", "block_size": block_size})
 
+wandb.watch(model)
+print(model)
+
 optimizer = AdamW(model.parameters(), lr=1e-4)
 criterion = torch.nn.CrossEntropyLoss()
 
@@ -85,13 +88,11 @@ for epoch in range(num_epochs):
         best_loss = avg_loss
         torch.save(model.state_dict(), f"model/best_model_{current_time}.pth")
 
-wandb.finish()
-
 ## Text Generation
 model.eval()
 context = "O God, O God!"
 input_ids = tokenizer(context, return_tensors="pt")["input_ids"].to(device)
 generated_ids = model.generate(input_ids, max_length=100, num_return_sequences=1, pad_token_id=tokenizer.eos_token_id)
 generated_text = tokenizer.decode(generated_ids[0], skip_special_tokens=True)
-
+print(generated_text)
 wandb.log({"generated_text": generated_text})
